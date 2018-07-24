@@ -18,7 +18,7 @@ export default class Memory {
     }
 
     if (password !== userCredentials.password) {
-      const error = Error('I do not like your password.');
+      const error = Error('Unauthorized access');
       error.status = 401;
       return done(error);
     }
@@ -46,11 +46,11 @@ export default class Memory {
   }
 
   allow_access(user, pkg, cb) {
-    const { name } = user;
-
     if (pkg.access.includes('$all') || pkg.access.includes('$anonymous')) {
       return cb(null, true);
     }
+
+    const { name } = user;
 
     if (!name) {
       const error = Error('not allowed to access package');
@@ -68,10 +68,11 @@ export default class Memory {
   }
 
   allow_publish(user, pkg, cb) {
-    const { name } = user;
     if (pkg.publish.includes('$all') || pkg.publish.includes('$anonymous')) {
       return cb(null, true);
     }
+
+    const { name } = user;
 
     if (!name) {
       const error = Error('not allowed to publish package');
