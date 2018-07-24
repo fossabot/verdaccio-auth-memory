@@ -1,15 +1,24 @@
+// @flow
 /**
  * Verdaccio auth memory
  */
 export default class Memory {
-  constructor(config, appOptions) {
+  // flow types
+  config: Object;
+  verdaccioConfig: Object;
+  users: Object;
+  max_users: number;
+  constructor(
+    config: { users: Object },
+    verdaccioConfig: { max_users: number }
+  ) {
     this.config = config;
-    this.appOptions = appOptions;
+    this.verdaccioConfig = verdaccioConfig;
     this.users = config.users || {};
-    this.max_users = appOptions.max_users || Infinity;
+    this.max_users = verdaccioConfig.max_users || Infinity;
   }
 
-  authenticate(user, password, done) {
+  authenticate(user: string, password: string, done: Function): Function {
     const { users } = this;
     const userCredentials = users[user];
 
@@ -19,6 +28,7 @@ export default class Memory {
 
     if (password !== userCredentials.password) {
       const error = Error('Unauthorized access');
+      // $FlowFixMe
       error.status = 401;
       return done(error);
     }
@@ -28,7 +38,7 @@ export default class Memory {
     return done(null, [user]);
   }
 
-  adduser(user, password, done) {
+  adduser(user: Object, password: string, done: Function): Function {
     const { users, max_users } = this;
     if (users[user]) {
       return done(null, true);
@@ -36,16 +46,17 @@ export default class Memory {
 
     if (max_users && Object.keys(users).length >= max_users) {
       let error = Error('maximum amount of users reached');
+      // $FlowFixMe
       error.status = 409;
       return done(error);
     }
 
     this.users[user] = { name: user, password };
 
-    done(null, user);
+    return done(null, user);
   }
 
-  allow_access(user, pkg, cb) {
+  allow_access(user: Object, pkg: Object, cb: Function): Function {
     if (pkg.access.includes('$all') || pkg.access.includes('$anonymous')) {
       return cb(null, true);
     }
@@ -54,6 +65,7 @@ export default class Memory {
 
     if (!name) {
       const error = Error('not allowed to access package');
+      // $FlowFixMe
       error.status = 403;
       return cb(error);
     }
@@ -63,11 +75,12 @@ export default class Memory {
     }
 
     const error = Error('not allowed to access package');
+    // $FlowFixMe
     error.status = 403;
     return cb(error);
   }
 
-  allow_publish(user, pkg, cb) {
+  allow_publish(user: Object, pkg: Object, cb: Function) {
     if (pkg.publish.includes('$all') || pkg.publish.includes('$anonymous')) {
       return cb(null, true);
     }
@@ -76,6 +89,7 @@ export default class Memory {
 
     if (!name) {
       const error = Error('not allowed to publish package');
+      // $FlowFixMe
       error.status = 403;
       return cb(error);
     }
@@ -85,6 +99,7 @@ export default class Memory {
     }
 
     const error = Error('not allowed to publish package');
+    // $FlowFixMe
     error.status = 403;
     return cb(error);
   }
